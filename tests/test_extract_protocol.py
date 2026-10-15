@@ -27,9 +27,23 @@ def extract_upstream(monkeypatch, tmp_path):
         calls.append(dict(params))
         if params.get("output") == "md":
             return "# Example page\n\nPage content.\n"
-        payload = {"text_content": {"markdown": "Page content."}}
-        if not params.get("json_restrictor"):
-            payload["search_metadata"] = {"status": "Success"}
+        text_content = {"full": "Page content."}
+        if params.get("include_markdown", False):
+            text_content["markdown"] = "Page content."
+        payload = {
+            "search_metadata": {"status": "Success"},
+            "page_information": {"title": "Example page"},
+            "text_content": text_content,
+        }
+        restrictor = params.get("json_restrictor")
+        if restrictor == "text_content.markdown":
+            payload = (
+                {"text_content": {"markdown": text_content["markdown"]}}
+                if "markdown" in text_content
+                else {}
+            )
+        elif restrictor:
+            payload = {restrictor: payload[restrictor]}
         return SerpResults(payload, client=None)
 
     monkeypatch.setattr(tools.serpapi, "search", search)
@@ -147,9 +161,11 @@ async def test_extract_markdown_defaults_for_content_modes(
             {"mode": "scrape", "output": "json"},
             {"include_markdown": True, "json_restrictor": "text_content.markdown"},
         ),
-        ({"include_markdown": False}, {"json_restrictor": "text_content.markdown"}),
+        ({"include_markdown": False}, {"json_restrictor": "text_content"}),
         ({"json_restrictor": "text_content"}, {"include_markdown": True}),
         ({"json_restrictor": ""}, {"include_markdown": True}),
+        ({"include_markdown": False, "json_restrictor": "page_information"}, {}),
+        ({"include_markdown": False, "json_restrictor": ""}, {}),
     ],
 )
 async def test_extract_compact_defaults_preserve_overrides_and_search(
@@ -168,7 +184,13 @@ async def test_extract_compact_defaults_preserve_overrides_and_search(
     assert not extracted.is_error
     assert not searched.is_error
     assert extracted.structured_content == {"result": extracted.content[0].text}
-    assert "search_metadata" not in json.loads(extracted.content[0].text)
+    data = json.loads(extracted.content[0].text)
+    assert data
+    assert "search_metadata" not in data
+    if options.get("include_markdown") is False:
+        assert "markdown" not in data.get("text_content", {})
+        if "json_restrictor" not in options:
+            assert data == {"text_content": {"full": "Page content."}}
 
 
 @pytest.mark.parametrize("protocol", ["auto", "legacy"])

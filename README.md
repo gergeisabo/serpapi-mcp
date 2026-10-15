@@ -181,7 +181,7 @@ Some parameters you can provide:
 - `params.output`: Response format; omit for JSON (default), or set to `"md"` for Markdown
 - `params.max_pages`: Maximum pages to crawl, including the starting page (default: 10, maximum: 100)
 - `params.json_restrictor`: Choose which fields to return, such as `"text_content.markdown"`
-- `mode`: Response mode; `"complete"` (default) returns the full response. For single-page JSON extraction, `"compact"` returns only `text_content.markdown`. For map and crawl, it removes JSON metadata. Markdown output is returned unchanged.
+- `mode`: Response mode; `"complete"` (default) returns the full response. For single-page JSON extraction, `"compact"` returns only `text_content.markdown`, or the `text_content` section when `params.include_markdown` is `false`. For map and crawl, it removes JSON metadata. Markdown output is returned unchanged.
 
 **Examples:**
 
@@ -193,7 +193,7 @@ Some parameters you can provide:
 {"name": "extract", "arguments": {"params": {"url": "https://example.com", "mode": "crawl", "max_pages": 2}}}
 ```
 
-For only a single page's content, use `mode="compact"`, or set `params.include_markdown` to `true` and `params.json_restrictor` to `"text_content.markdown"`. This returns the page's Markdown without the other response sections.
+For only a single page's content, use `mode="compact"`, or set `params.include_markdown` to `true` and `params.json_restrictor` to `"text_content.markdown"`. This returns the page's Markdown without the other response sections. With `params.include_markdown=false`, compact returns the `text_content` section without Markdown.
 
 Crawling consumes one search credit per successfully extracted page on an uncached request. Use `params.max_pages` to limit how many pages are extracted.
 

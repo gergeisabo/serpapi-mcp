@@ -258,7 +258,8 @@ extract_tool_description = """Extract page content as structured JSON or Markdow
             - json_restrictor: Select the response fields to return.
         mode: Response mode, "complete" (default) or "compact".
             For single-page JSON extraction, compact defaults json_restrictor to
-            "text_content.markdown". Explicit parameter values take precedence.
+            "text_content.markdown", or "text_content" when include_markdown is false.
+            Explicit parameter values take precedence.
             For map and crawl, compact removes JSON metadata.
             Extract's scrape/map/crawl mode goes in params.mode. Markdown is returned unchanged.
 
@@ -266,6 +267,7 @@ extract_tool_description = """Extract page content as structured JSON or Markdow
         For only a single page's content, use mode="compact" with the default scrape mode,
         or explicitly set include_markdown=true and json_restrictor="text_content.markdown".
         This returns the page's Markdown in text_content.markdown and leaves out the other response sections.
+        With include_markdown=false, compact returns the text_content section without Markdown.
 
     Output:
         structuredContent.result and text content contain the same serialized JSON or Markdown string.
@@ -316,7 +318,12 @@ async def extract(
         and params.get("mode", "scrape") == "scrape"
         and params.get("output", "json") == "json"
     ):
-        params.setdefault("json_restrictor", "text_content.markdown")
+        params.setdefault(
+            "json_restrictor",
+            "text_content"
+            if params.get("include_markdown") is False
+            else "text_content.markdown",
+        )
     return await search(params=params, mode=mode, ctx=ctx)
 
 
