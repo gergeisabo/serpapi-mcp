@@ -16,7 +16,9 @@ from src.server import mcp
 def extract_upstream(monkeypatch, tmp_path):
     # The published catalog is generated at build time. Keep these checks
     # independent of a developer's generated or untracked engine files.
-    (tmp_path / "extract.json").write_text(json.dumps({"params": {"url": {"required": True}}}))
+    (tmp_path / "extract.json").write_text(
+        json.dumps({"params": {"url": {"required": True}}})
+    )
     monkeypatch.setattr(input_rules, "ENGINES_DIR", tmp_path)
     monkeypatch.setenv("SERPAPI_API_KEY", "EXTRACT_TEST_KEY")
     calls = []
@@ -51,7 +53,12 @@ def extract_upstream(monkeypatch, tmp_path):
         ({"mode": "map", "include_sitemap": False}, "complete"),
         ({"mode": "map", "include_sitemap": False}, "compact"),
         (
-            {"mode": "crawl", "max_pages": 2, "timeout": 1000, "include_markdown": True},
+            {
+                "mode": "crawl",
+                "max_pages": 2,
+                "timeout": 1000,
+                "include_markdown": True,
+            },
             "compact",
         ),
     ],
@@ -66,12 +73,17 @@ async def test_extract_mirrors_search_and_forces_engine(
         **options,
     }
     async with Client(mcp, mode=protocol) as client:
-        extracted = await client.call_tool_mcp("extract", {"params": params, "mode": response_mode})
+        extracted = await client.call_tool_mcp(
+            "extract", {"params": params, "mode": response_mode}
+        )
         searched = await client.call_tool_mcp(
             "search",
             {"params": {**params, "engine": "extract"}, "mode": response_mode},
         )
-    assert extract_upstream == [{**params, "engine": "extract", "api_key": "EXTRACT_TEST_KEY"}] * 2
+    assert (
+        extract_upstream
+        == [{**params, "engine": "extract", "api_key": "EXTRACT_TEST_KEY"}] * 2
+    )
     assert not extracted.is_error
     assert extracted.structured_content == searched.structured_content
     assert extracted.content == searched.content
@@ -103,7 +115,9 @@ async def test_extract_markdown_defaults_for_content_modes(
     original = dict(params)
 
     async with Client(mcp) as client:
-        extracted = await client.call_tool_mcp("extract", {"params": params, "mode": response_mode})
+        extracted = await client.call_tool_mcp(
+            "extract", {"params": params, "mode": response_mode}
+        )
         searched = await client.call_tool_mcp(
             "search", {"params": {**params, "engine": "extract"}, "mode": response_mode}
         )
@@ -117,7 +131,11 @@ async def test_extract_markdown_defaults_for_content_modes(
         assert "include_markdown" not in extract_upstream[0]
     else:
         assert extract_upstream[0]["include_markdown"] is True
-    assert extract_upstream[1] == {**params, "engine": "extract", "api_key": "EXTRACT_TEST_KEY"}
+    assert extract_upstream[1] == {
+        **params,
+        "engine": "extract",
+        "api_key": "EXTRACT_TEST_KEY",
+    }
 
 
 @pytest.mark.parametrize("protocol", ["auto", "legacy"])
@@ -139,7 +157,9 @@ async def test_extract_compact_defaults_preserve_overrides_and_search(
 ):
     params = {"url": "https://example.com", **options}
     async with Client(mcp, mode=protocol) as client:
-        extracted = await client.call_tool_mcp("extract", {"params": params, "mode": "compact"})
+        extracted = await client.call_tool_mcp(
+            "extract", {"params": params, "mode": "compact"}
+        )
         searched = await client.call_tool_mcp(
             "search", {"params": {**params, "engine": "extract"}, "mode": "compact"}
         )
@@ -184,7 +204,11 @@ async def test_extract_guided_url_preserves_engine_and_context(
         assert not extract_upstream
         return ElicitResult(
             action=action,
-            content={"url": "https://example.com", "engine": "google", "api_key": "UNTRUSTED"},
+            content={
+                "url": "https://example.com",
+                "engine": "google",
+                "api_key": "UNTRUSTED",
+            },
         )
 
     async with Client(mcp, elicitation_handler=answer) as client:
@@ -209,7 +233,8 @@ async def test_extract_requires_trusted_authentication(extract_upstream, monkeyp
     monkeypatch.delenv("SERPAPI_API_KEY")
     async with Client(mcp) as client:
         result = await client.call_tool_mcp(
-            "extract", {"params": {"url": "https://example.com", "api_key": "UNTRUSTED"}}
+            "extract",
+            {"params": {"url": "https://example.com", "api_key": "UNTRUSTED"}},
         )
     assert result.is_error
     assert "Missing API key" in result.content[0].text
@@ -223,7 +248,9 @@ async def test_extract_preserves_upstream_error_wrapper(extract_upstream, monkey
         lambda params: SerpResults({"error": "Extraction failed"}, client=None),
     )
     async with Client(mcp) as client:
-        result = await client.call_tool_mcp("extract", {"params": {"url": "https://example.com"}})
+        result = await client.call_tool_mcp(
+            "extract", {"params": {"url": "https://example.com"}}
+        )
     assert result.is_error
     assert result.structured_content == {"result": "Error: Extraction failed"}
     assert result.content[0].text == "Error: Extraction failed"
