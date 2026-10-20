@@ -19,7 +19,6 @@
         "ebay.it",
         "ebay.com.my",
         "ebay.nl",
-        "ebay.ph",
         "ebay.pl",
         "ebay.com.sg",
         "ebay.es",
@@ -934,23 +933,19 @@
       "type": "select",
       "options": [
         [
-          50,
-          "50 - Items Per Page"
+          "60",
+          "60 - Items Per Page"
         ],
         [
-          25,
-          "25 - Items Per Page"
+          "120",
+          "120 - Items Per Page"
         ],
         [
-          100,
-          "100 - Items Per Page"
-        ],
-        [
-          200,
-          "200 - Items Per Page"
+          "240",
+          "240 - Items Per Page"
         ]
       ],
-      "description": "Parameter defines the maximum number of results to return. There are total of four options: `25`, `50` (default), `100` and `200` results.",
+      "description": "Parameter defines the maximum number of results to return. There are three options: `60` (default), `120` and `240` results.",
       "group": "pagination"
     },
     "_blrs": {
@@ -959,7 +954,7 @@
       "group": "advanced_filters"
     },
     "show_only": {
-      "description": "Parameter defines the list of filters you can apply to the results. Available options **(case-sensitive)**: `Complete` - Completed items `Sold` - Sold items `FR` - Free returns `RPA` - Returns accepted `AS` - Authorized seller `Savings` - Deals and savings `SaleItems` - Sale items `Lots` - Listed as lots `Charity` - Benefits charity `AV` - Authenticity Guarantee `FS` - Free shipping `LPickup` - Local pickup You can also combine multiple filter values by joining them with a comma (`value` + `,` + `value`; eg: `Sold,FS`).",
+      "description": "Parameter defines the list of filters you can apply to the results. Available options **(case-sensitive)**: `FR` - Free returns `RPA` - Returns accepted `AS` - Authorized seller `Savings` - Deals and savings `SaleItems` - Sale items `Lots` - Listed as lots `Charity` - Benefits charity `AV` - Authenticity Guarantee `FS` - Free shipping `LPickup` - Local pickup You can also combine multiple filter values by joining them with a comma (`value` + `,` + `value`; eg: `FS,RPA`). The `Sold` and `Complete` options are deprecated and no longer supported.",
       "group": "advanced_filters"
     },
     "buying_format": {
@@ -970,6 +965,29 @@
         "BO"
       ],
       "description": "Parameter defines the buying format you can apply to the results. Available options **(case-sensitive)**: `Auction` - Auction `BIN` - Buy It Now `BO` - Accepts Offers",
+      "group": "advanced_filters"
+    },
+    "_sasl": {
+      "description": "Parameter defines the seller username(s) to filter results by. You can specify multiple sellers separated by commas (e.g. `iRobot,samsung`). Use with `_saslop` to control whether to include or exclude items from the specified seller(s).",
+      "group": "advanced_filters"
+    },
+    "_saslop": {
+      "type": "select",
+      "options": [
+        [
+          "1",
+          "Only show items from sellers (default)"
+        ],
+        [
+          "2",
+          "Don't show items from sellers"
+        ]
+      ],
+      "description": "Parameter defines whether to include or exclude items from the seller(s) specified in `_sasl`. Available options: `1` - Only show items from sellers (default) `2` - Don't show items from sellers",
+      "group": "advanced_filters"
+    },
+    "popular_filters": {
+      "description": "Parameter allows filtering items based on their attributes. The structure is a list of `key=value` pairs separated by `&` (e.g. `Brand=Nespresso&Size=L`). To pass multiple values for the same filter, join them with `|` (e.g. `Brand=adidas|Majestic`). Values can be obtained from the `popular_filters[].parameter` field of the API response.",
       "group": "advanced_filters"
     },
     "_udlo": {
@@ -1079,12 +1097,12 @@
   "common_params": {
     "engine": {
       "required": true,
-      "description": "Set parameter to `ebay` to use the Ebay API engine.",
+      "description": "Set parameter to `ebay` to use the eBay API engine.",
       "group": "serpapi_parameters"
     },
     "no_cache": {
       "type": "checkbox",
-      "description": "Parameter will force SerpApi to fetch the Ebay results even if a cached version is already present. A cache is served only if the query and all parameters are exactly the same. Cache expires after 1h. Cached searches are free, and are not counted towards your searches per month. It can be set to `false` (default) to allow results from the cache, or `true` to disallow results from the cache. no\\_cache and async parameters should not be used together.",
+      "description": "Parameter will force SerpApi to fetch the eBay results even if a cached version is already present. A cache is served only if the query and all parameters are exactly the same. Cache expires after 1h. Cached searches are free, and are not counted towards your searches per month. It can be set to `false` (default) to allow results from the cache, or `true` to disallow results from the cache. no\\_cache and async parameters should not be used together.",
       "group": "serpapi_parameters"
     },
     "async": {
@@ -1101,11 +1119,11 @@
       "group": "serpapi_parameters"
     },
     "output": {
-      "description": "Parameter defines the final output you want. It can be set to json (default) to get a structured `JSON` of the results, or `html` to get the raw html retrieved.",
+      "description": "Parameter defines the format of the result. It can be set to `json` (default) to get a structured JSON of the results, `html` to get the raw HTML retrieved, or `md` to get a markdown-formatted version optimized for LLMs and AI agents.",
       "group": "serpapi_parameters"
     },
     "json_restrictor": {
-      "description": "Parameter defines the fields you want to restrict in the outputs for smaller, faster responses. See JSON Restrictor for more details.",
+      "description": "Parameter defines the fields you want to include in the output, reducing payload size for faster response. See the JSON Restrictor documentation for more details.",
       "group": "serpapi_parameters"
     }
   }
